@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/select";
 
 import { subjects } from "@/constants";
+import {createCompanion} from "@/lib/actions/companion.actions";
+import {redirect} from "next/navigation";
 
 // ------------------ Schema ------------------
 const schema = z.object({
@@ -55,7 +57,16 @@ export default function CompanionForm() {
     },
   });
 
-  const onSubmit = (values: FormData) => console.log(values);
+  const onSubmit = async (values: FormData) => {
+    try {
+      const companion = await createCompanion(values);
+      redirect(`/companions/${companion.id}`);
+    } catch (error) {
+      console.error("Failed to create companion:", error);
+      // TODO: Show error toast/notification to user
+      redirect("/");
+    }
+  };
 
   const renderSelect = (
     name: keyof FormData,
@@ -70,7 +81,13 @@ export default function CompanionForm() {
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={(value) => {
+                  const parsedValue = name === "duration" ? Number(value) : value
+                  field.onChange(parsedValue)
+                }}
+                value={field.value?.toString()}
+              >
               <SelectTrigger className="input capitalize">
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
