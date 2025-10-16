@@ -2,6 +2,7 @@ import {getAllCompanions} from "@/lib/actions/companion.actions";
 import CompanionCard from "@/components/CompanionCard";
 import SearchInput from "@/components/SearchInput";
 import {getSubjectColor} from "@/lib/utils";
+import SubjectFilter from "@/components/SubjectFilter";
 
 const CompanionLibrary = async ({searchParams}: SearchParams) => {
   // Extract and normalize filters
@@ -17,7 +18,10 @@ const CompanionLibrary = async ({searchParams}: SearchParams) => {
       {/* Header with search */}
       <section className="flex justify-between gap-4 max-sm:flex-col">
         <h1 className="text-3xl font-bold">Companion Library</h1>
-        <SearchInput/>
+        <div className="flex gap-4">
+          <SearchInput/>
+          <SubjectFilter/>
+        </div>
       </section>
 
       {/* Companion grid */}

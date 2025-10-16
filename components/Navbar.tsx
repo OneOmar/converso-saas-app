@@ -14,14 +14,14 @@ const Navbar = () => {
     <nav className="navbar flex justify-between items-center px-6 py-4 bg-white shadow-md">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2.5">
-        <Image src="/images/logo.svg" alt="logo" width={46} height={44} />
-        <span className="font-bold text-lg">MyApp</span>
+        <Image src="/images/logo.svg" alt="logo" width={46} height={44}/>
+        {/*<span className="font-bold text-lg">MyApp</span>*/}
       </Link>
 
       {/* Navigation & Auth Buttons */}
       <div className="flex items-center gap-6">
         {/* Navigation links */}
-        <NavItems />
+        <NavItems/>
 
         {/* Authentication */}
         <div className="flex items-center gap-4">
@@ -37,7 +37,7 @@ const Navbar = () => {
 
           {/* Shown when user is signed in */}
           <SignedIn>
-            <UserButton />
+            <UserButton/>
           </SignedIn>
         </div>
       </div>
