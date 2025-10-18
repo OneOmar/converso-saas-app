@@ -11,7 +11,7 @@ import {
 
 const Navbar = () => {
   return (
-    <nav className="navbar flex justify-between items-center px-6 py-4 bg-white shadow-md">
+    <nav className="navbar flex justify-between items-center px-6 py-4 bg-white">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-2.5">
         <Image src="/images/logo.svg" alt="logo" width={46} height={44}/>
