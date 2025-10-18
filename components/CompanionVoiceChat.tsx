@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import Image from "next/image";
 import {cn, configureAssistant, getSubjectColor} from "@/lib/utils";
 import vapi from "@/lib/vapi.sdk";
@@ -45,6 +45,16 @@ const CompanionVoiceChat = ({
   // Transcript messages (newest first)
   const [messages, setMessages] = useState<SavedMessage[]>([]);
 
+  // Ref for auto-scrolling transcript
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * Auto-scroll to latest message
+   */
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({behavior: 'smooth'});
+  }, [messages]);
+
   /**
    * Setup VAPI event listeners for voice call management
    * Handles call lifecycle, transcription, and speech detection
@@ -53,22 +63,20 @@ const CompanionVoiceChat = ({
     // Call started successfully
     const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
 
-    // Call ended - save to history
+    // Call ended - save it to history
     const onCallEnd = async () => setCallStatus(CallStatus.FINISHED);
 
     // Process incoming messages and transcripts
     const onMessage = (message: Message) => {
-
       // Only save final transcripts (ignore partial)
       if (message.type === 'transcript' && message.transcriptType === 'final') {
         const newMessage = {role: message.role, content: message.transcript};
-
-        // Add to beginning of array for reverse chronological order
-        setMessages((prev) => [newMessage, ...prev]);
+        // Add to the end of array for chronological order
+        setMessages((prev) => [...prev, newMessage]);
       }
     };
 
-    // Track when assistant starts/stops speaking
+    // Track when the assistant starts/stops speaking
     const onSpeechStart = () => setIsSpeaking(true);
     const onSpeechEnd = () => setIsSpeaking(false);
 
@@ -83,7 +91,7 @@ const CompanionVoiceChat = ({
     vapi.on('speech-start', onSpeechStart);
     vapi.on('speech-end', onSpeechEnd);
 
-    // Cleanup: Remove all listeners on component unmount
+    // Cleanup: Remove all listeners on a component unmount
     return () => {
       vapi.off('call-start', onCallStart);
       vapi.off('call-end', onCallEnd);
@@ -141,7 +149,7 @@ const CompanionVoiceChat = ({
     }
   };
 
-  // Simple bot display name - just use "Bot" for clarity
+  // Simple bot display name
   const botName = "AI";
 
   return (
@@ -169,9 +177,7 @@ const CompanionVoiceChat = ({
               height={150}
               className={cn(
                 "transition-all duration-1000 ease-in-out max-sm:w-fit",
-                {
-                  "animate-pulse": callStatus === CallStatus.CONNECTING,
-                }
+                callStatus === CallStatus.CONNECTING && "animate-pulse"
               )}
             />
           </div>
@@ -214,9 +220,7 @@ const CompanionVoiceChat = ({
           <button
             className={cn(
               'rounded-lg py-2 cursor-pointer transition-colors w-full text-white',
-              // Red when active (for ending), primary otherwise
               callStatus === CallStatus.ACTIVE ? 'bg-red-700' : 'bg-primary',
-              // Pulse animation while connecting
               callStatus === CallStatus.CONNECTING && 'animate-pulse'
             )}
             onClick={callStatus === CallStatus.ACTIVE ? handleDisconnect : handleCall}
@@ -232,27 +236,36 @@ const CompanionVoiceChat = ({
 
       {/* Real-time transcript display */}
       <section className="transcript">
-        <div className="transcript-message no-scrollbar">
-          {/* Display messages in reverse chronological order */}
-          {messages.map((message, index) => {
-            if (message.role === 'assistant') {
-              return (
-                <p key={index} className="max-sm:text-sm mb-2">
-                  <strong>{botName}:</strong> {message.content}
-                </p>
-              );
-            } else {
-              return (
-                <p key={index} className="text-primary max-sm:text-sm mb-2">
-                  <strong>{userName}:</strong> {message.content}
-                </p>
-              );
-            }
-          })}
+        <div className="transcript-message">
+          {/* Empty state */}
+          {messages.length === 0 && (
+            <p className="text-gray-400 text-center text-lg">
+              Start a session to begin the conversation
+            </p>
+          )}
+
+          {/* Display messages in chronological order */}
+          {messages.map((message, index) => (
+            <p
+              key={index}
+              className={cn(
+                'text-lg leading-relaxed',
+                message.role === 'user' && 'text-primary'
+              )}
+            >
+              <strong>
+                {message.role === 'assistant' ? botName : userName}:
+              </strong>{' '}
+              {message.content}
+            </p>
+          ))}
+
+          {/* Auto-scroll anchor */}
+          <div ref={messagesEndRef}/>
         </div>
 
         {/* Fade overlay for visual depth */}
-        <div className="transcript-fade"/>
+        {/*<div className="transcript-fade"/>*/}
       </section>
     </section>
   );
