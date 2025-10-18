@@ -1,7 +1,7 @@
 import CompanionCard from "@/components/CompanionCard";
 import CompanionsList from "@/components/CompanionsList";
 import Cta from "@/components/Cta";
-import { recentSessions } from "@/constants";
+import {recentSessions} from "@/constants";
 
 const Page = () => {
   return (
@@ -41,7 +41,7 @@ const Page = () => {
           companions={recentSessions}
           classNames="w-2/3 max-lg:w-full"
         />
-        <Cta />
+        <Cta/>
       </section>
     </main>
   );
