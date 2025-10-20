@@ -4,6 +4,7 @@ import {useEffect, useRef, useState} from 'react';
 import Image from "next/image";
 import {cn, configureAssistant, getSubjectColor} from "@/lib/utils";
 import vapi from "@/lib/vapi.sdk";
+import {addToSessionHistory} from "@/lib/actions/companion.actions";
 
 /**
  * Call status enumeration
@@ -64,7 +65,10 @@ const CompanionVoiceChat = ({
     const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
 
     // Call ended - save it to history
-    const onCallEnd = async () => setCallStatus(CallStatus.FINISHED);
+    const onCallEnd = async () => {
+      setCallStatus(CallStatus.FINISHED);
+      await addToSessionHistory(companionId);
+    }
 
     // Process incoming messages and transcripts
     const onMessage = (message: Message) => {
