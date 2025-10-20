@@ -45,7 +45,7 @@ const Profile = async () => {
           </div>
         </div>
 
-        {/* Stats cards */}
+        {/* Stat cards */}
         <div className="flex gap-4 max-sm:w-full">
           {/* Lessons completed */}
           <div className="border border-black rounded-lg p-3 gap-2 flex flex-col h-fit">
