@@ -141,3 +141,22 @@ export const getUserSessions = async (userId: string, limit = 10) => {
   // Extract companion objects from a nested structure
   return data.map(({companions}) => companions);
 };
+
+/**
+ * Get all companions created by a specific user
+ * Returns companions where the user is the author
+ */
+export const getUserCompanions = async (userId: string) => {
+  const supabase = await createSupabaseClient();
+
+  // Fetch companions created by this user
+  const {data, error} = await supabase
+    .from('companions')
+    .select()
+    .eq('author', userId)
+    .order('created_at', {ascending: false});
+
+  if (error) throw new Error(error.message);
+
+  return data;
+};
