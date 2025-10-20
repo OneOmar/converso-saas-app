@@ -70,3 +70,74 @@ export const getCompanion = async (id: string) => {
 
   return data;
 };
+
+/**
+ * Session History Actions
+ * Manages user session tracking for companion conversations
+ */
+
+/**
+ * Add a completed session to user's history
+ * Records when a user finishes a conversation with a companion
+ */
+export const addToSessionHistory = async (companionId: string) => {
+  // Get authenticated user ID
+  const {userId} = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  // Insert session record
+  const supabase = await createSupabaseClient();
+  const {data, error} = await supabase
+    .from('session_history')
+    .insert({
+      companion_id: companionId,
+      user_id: userId,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+
+  return data;
+};
+
+/**
+ * Get recent sessions across all users
+ * Returns the most recently completed companion sessions
+ */
+export const getRecentSessions = async (limit = 10) => {
+  const supabase = await createSupabaseClient();
+
+  // Fetch sessions with companion details
+  const {data, error} = await supabase
+    .from('session_history')
+    .select('companions:companion_id (*)')
+    .order('created_at', {ascending: false})
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+
+  // Extract companion objects from a nested structure
+  return data.map(({companions}) => companions);
+};
+
+/**
+ * Get session history for a specific user
+ * Returns a user's recently completed companion sessions
+ */
+export const getUserSessions = async (userId: string, limit = 10) => {
+  const supabase = await createSupabaseClient();
+
+  // Fetch user's sessions with companion details
+  const {data, error} = await supabase
+    .from('session_history')
+    .select('companions:companion_id (*)')
+    .eq('user_id', userId)
+    .order('created_at', {ascending: false})
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+
+  // Extract companion objects from a nested structure
+  return data.map(({companions}) => companions);
+};

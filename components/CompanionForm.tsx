@@ -1,10 +1,10 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
+import {z} from "zod";
 
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,8 +13,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
+import {Input} from "@/components/ui/input";
+import {Textarea} from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -23,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { subjects } from "@/constants";
+import {subjects} from "@/constants";
 import {createCompanion} from "@/lib/actions/companion.actions";
 import {redirect} from "next/navigation";
 
@@ -34,7 +35,7 @@ const schema = z.object({
   topic: z.string().min(1, "Topic is required."),
   voice: z.string().min(1, "Voice is required."),
   style: z.string().min(1, "Style is required."),
-  duration: z.number().min(1, "Duration is required."),
+  duration: z.coerce.number().min(1, "Duration is required."),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -53,7 +54,7 @@ export default function CompanionForm() {
       topic: "",
       voice: "",
       style: "",
-      duration: 15,
+      duration: 5,
     },
   });
 
@@ -77,19 +78,19 @@ export default function CompanionForm() {
     <FormField
       control={form.control}
       name={name}
-      render={({ field }) => (
+      render={({field}) => (
         <FormItem>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-              <Select
-                onValueChange={(value) => {
-                  const parsedValue = name === "duration" ? Number(value) : value
-                  field.onChange(parsedValue)
-                }}
-                value={field.value?.toString()}
-              >
+            <Select
+              onValueChange={(value) => {
+                const parsedValue = name === "duration" ? Number(value) : value
+                field.onChange(parsedValue)
+              }}
+              value={field.value?.toString()}
+            >
               <SelectTrigger className="input capitalize">
-                <SelectValue placeholder={placeholder} />
+                <SelectValue placeholder={placeholder}/>
               </SelectTrigger>
               <SelectContent>
                 {options.map((option) => (
@@ -100,7 +101,7 @@ export default function CompanionForm() {
               </SelectContent>
             </Select>
           </FormControl>
-          <FormMessage />
+          <FormMessage/>
         </FormItem>
       )}
     />
@@ -113,13 +114,13 @@ export default function CompanionForm() {
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>Companion name</FormLabel>
               <FormControl>
                 <Input placeholder="Enter the companion name" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage/>
             </FormItem>
           )}
         />
@@ -131,13 +132,13 @@ export default function CompanionForm() {
         <FormField
           control={form.control}
           name="topic"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>Companion topic</FormLabel>
               <FormControl>
                 <Textarea placeholder="Ex. Derivatives & Integrals" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage/>
             </FormItem>
           )}
         />
@@ -152,13 +153,13 @@ export default function CompanionForm() {
         <FormField
           control={form.control}
           name="duration"
-          render={({ field }) => (
+          render={({field}) => (
             <FormItem>
               <FormLabel>Session duration (mins)</FormLabel>
               <FormControl>
                 <Input type="number" placeholder="15" {...field} />
               </FormControl>
-              <FormMessage />
+              <FormMessage/>
             </FormItem>
           )}
         />
