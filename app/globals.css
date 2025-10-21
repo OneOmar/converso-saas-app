@@ -133,7 +133,7 @@ body {
     }
 
     main {
-        @apply w-full h-full max-w-[1400px] mx-auto px-6 max-sm:px-2 flex flex-col gap-8 bg-background mb-5;
+        @apply w-full h-full max-w-[1400px] mx-auto px-6 max-sm:px-2 flex flex-col gap-8 bg-background pt-10 mb-5;
     }
 
     h1 {

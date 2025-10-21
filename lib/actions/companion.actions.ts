@@ -160,3 +160,43 @@ export const getUserCompanions = async (userId: string) => {
 
   return data;
 };
+
+/**
+ * Check if a user can create a new companion
+ * Based on their subscription plan and current companion count
+ */
+export const newCompanionPermissions = async () => {
+  const {userId, has} = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  // Pro users have unlimited companions
+  if (has({plan: 'pro'})) {
+    return true;
+  }
+
+  // Determine user's companion limit based on plan
+  let limit = 0;
+  if (has({feature: "10_active_companions"})) {
+    limit = 10;
+  } else if (has({feature: "3_active_companions"})) {
+    limit = 3;
+  }
+
+  // Count user's existing companions
+  const supabase = await createSupabaseClient();
+  const {count, error} = await supabase
+    .from('companions')
+    .select('*', {
+      count: 'exact',
+      head: true
+    }) // Used count directly - `{ count: 'exact', head: true }` is more efficient and faster! (doesn't fetch data)
+    .eq('author', userId);
+
+  // console.log("User's existing companions:", count);
+  // console.log("User's companion limit:", limit);
+
+  if (error) throw new Error(error.message);
+
+  // Check if a user is under their limit
+  return (count || 0) < limit;
+};
