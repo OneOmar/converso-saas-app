@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/accordion";
 import CompanionsList from "@/components/CompanionsList";
 import {
+  getBookmarkedCompanions,
   getUserCompanions,
   getUserSessions,
 } from "@/lib/actions/companion.actions";
@@ -18,9 +19,12 @@ const Profile = async () => {
   const user = await currentUser();
   if (!user) redirect("/sign-in");
 
-  // Fetch user data
-  const companions = await getUserCompanions(user.id);
-  const sessionHistory = await getUserSessions(user.id);
+  // Fetch all user data in parallel for better performance
+  const [companions, sessionHistory, bookmarkedCompanions] = await Promise.all([
+    getUserCompanions(user.id),
+    getUserSessions(user.id),
+    getBookmarkedCompanions(user.id),
+  ]);
 
   return (
     <main className="max-w-5xl">
@@ -74,6 +78,24 @@ const Profile = async () => {
 
       {/* Expandable sections */}
       <Accordion type="multiple" className="w-full">
+        {/* Bookmarked companions */}
+        <AccordionItem value="bookmarks">
+          <AccordionTrigger className="text-2xl font-bold">
+            Bookmarked Companions ({bookmarkedCompanions.length})
+          </AccordionTrigger>
+          <AccordionContent>
+            {bookmarkedCompanions.length > 0 ? (
+              <CompanionsList
+                title="Bookmarked Companions"
+                companions={bookmarkedCompanions}
+              />
+            ) : (
+              <p className="text-center text-muted-foreground py-8">
+                No bookmarked companions yet. Start bookmarking your favorites!
+              </p>
+            )}
+          </AccordionContent>
+        </AccordionItem>
         {/* Recent sessions */}
         <AccordionItem value="recent">
           <AccordionTrigger className="text-2xl font-bold">

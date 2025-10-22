@@ -2,6 +2,7 @@
 
 import {auth} from "@clerk/nextjs/server";
 import {createSupabaseClient} from "@/lib/supabase";
+import {revalidatePath} from "next/cache";
 
 // Create a new companion in the database
 export const createCompanion = async (formData: CreateCompanion) => {
@@ -199,4 +200,78 @@ export const newCompanionPermissions = async () => {
 
   // Check if a user is under their limit
   return (count || 0) < limit;
+};
+
+/**
+ * Bookmark Actions
+ * Manages user bookmarks for companions
+ */
+
+/**
+ * Add a companion to user's bookmarks
+ * Revalidates the page to show the updated bookmark state
+ */
+export const addBookmark = async (companionId: string, path: string) => {
+  // Verify authentication
+  const {userId} = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  console.log("addBookmark args:", {companionId, userId});
+
+  // Insert bookmark record
+  const supabase = await createSupabaseClient();
+  const {error} = await supabase
+    .from("bookmarks")
+    .insert({
+      companion_id: companionId,
+      user_id: userId,
+    });
+
+  if (error) throw new Error(error.message);
+
+  // Refresh page to show bookmark icon change
+  revalidatePath(path);
+};
+
+/**
+ * Remove companion from user's bookmarks
+ * Revalidates the page to show an updated bookmark state
+ */
+export const removeBookmark = async (companionId: string, path: string) => {
+  // Verify authentication
+  const {userId} = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  // Delete bookmark record
+  const supabase = await createSupabaseClient();
+  const {error} = await supabase
+    .from("bookmarks")
+    .delete()
+    .eq("companion_id", companionId)
+    .eq("user_id", userId);
+
+  if (error) throw new Error(error.message);
+
+  // Refresh page to show bookmark icon change
+  revalidatePath(path);
+};
+
+/**
+ * Get all bookmarked companions for a user
+ * Returns full companion details via JOIN
+ */
+export const getBookmarkedCompanions = async (userId: string) => {
+  const supabase = await createSupabaseClient();
+
+  // Fetch bookmarks with companion details
+  const {data, error} = await supabase
+    .from("bookmarks")
+    .select("companions:companion_id (*)")
+    .eq("user_id", userId)
+    .order("created_at", {ascending: false});
+
+  if (error) throw new Error(error.message);
+
+  // Extract companion objects from a nested structure
+  return data.map(({companions}) => companions);
 };
